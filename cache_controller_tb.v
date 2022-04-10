@@ -23,7 +23,7 @@ wire mem_req_valid;
 
 cache_controller dut (
     .clock	       (clock),
-    .reset_n             (reset_n),
+    .reset_n       (reset_n),
 
     // For all the CPU signals
     .cpu_req_addr      (cpu_req_addr),  
@@ -44,21 +44,6 @@ cache_controller dut (
 	
 always #5 clock = ~clock; // Changing the clock at an delay of 5
 
-// Defining the function for reading from the CPU
-task read_cpu (input [31:0]addr);
-begin
-  #20 cpu_req_addr = addr; cpu_req_rw = 1'b0; cpu_req_valid = 1'b1;  // Execute the line at a delay of 20
-  #10 cpu_req_addr = 32'd0; cpu_req_rw = 1'b0; cpu_req_valid = 1'b0; // Execute the line at a delay of 10
-end 
-endtask
-
-// Defining the function for writing by the CPU
-task write_cpu (input [31:0]addr, input [127:0]data);
-begin
-  #20 cpu_req_addr = addr; cpu_req_rw = 1'b1; cpu_req_valid = 1'b1; cpu_req_datain = data; // Write to the Cache i.e. AB at a delay of 20
-  #10 cpu_req_addr = 32'd0; cpu_req_rw = 1'b0; cpu_req_valid = 1'b0; cpu_req_datain = 128'd0; // Execute the line at a delay of 10
-end
-endtask
 
 // Defining the function for resetting the values
 task reset_values ();
@@ -78,6 +63,23 @@ begin
   #20 reset_n = 1'b1; // Execute this line at a delay of 20
 end
 endtask
+
+// Defining the function for writing by the CPU
+task write_cpu (input [31:0]addr, input [127:0]data);
+begin
+  #20 cpu_req_addr = addr; cpu_req_rw = 1'b1; cpu_req_valid = 1'b1; cpu_req_datain = data; // Write to the Cache i.e. AB at a delay of 20
+  #10 cpu_req_addr = 32'd0; cpu_req_rw = 1'b0; cpu_req_valid = 1'b0; cpu_req_datain = 128'd0; // Execute the line at a delay of 10
+end
+endtask
+
+// Defining the function for reading from the CPU
+task read_cpu (input [31:0]addr);
+begin
+  #20 cpu_req_addr = addr; cpu_req_rw = 1'b0; cpu_req_valid = 1'b1;  // Execute the line at a delay of 20
+  #10 cpu_req_addr = 32'd0; cpu_req_rw = 1'b0; cpu_req_valid = 1'b0; // Execute the line at a delay of 10
+end 
+endtask
+
 
 initial begin
   $dumpfile("test.vcd");
